@@ -5,7 +5,7 @@ Use Node.js develop WeChat public number
 
 如果有自己的域名和服务器是再好不过的了，但是如果没有的话，可以像这样：
 
-起一个本地的node服务
+起一个本地的node服务，注意要是80端口
 
 `node app.js`
 

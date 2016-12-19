@@ -1,7 +1,7 @@
 'use strict'
 
 var Koa = require('koa')
-var sha1 = require('sha1')
+var wechat = require('./wechat/g')
 var config = {
     wechat: {
         appID: 'wxaf81ec5598df4b8b',
@@ -13,24 +13,8 @@ var config = {
 // 实例化koa的Web服务器
 var app = new Koa()
 
-// 中间件 生成器函数
-app.use(function* (next) {
-    console.log(this.query)
-
-    var token = config.wechat.token
-    var signature = this.query.signature
-    var nonce = this.query.nonce
-    var timestamp = this.query.timestamp
-    var echostr = this.query.echostr
-    var str = [token, timestamp, nonce].sort().join('')
-    var sha = sha1(str)
-
-    if (sha === signature) {
-        this.body = echostr + ''
-    } else {
-        this.body = 'wrong'
-    }
-})
+// Koa中间件必须是 Generator函数
+app.use(wechat(config.wechat))
 
 // 监听80端口
 app.listen(80)
