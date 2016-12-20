@@ -4,14 +4,17 @@ var Promise = require('bluebird')
 // 用bluebird对request进行promise化
 var request = Promise.promisify(require('request'))
 
+// 接口调用前缀
 var prefix = 'https://api.weixin.qq.com/cgi-bin/'
 var api = {
+    // 配置获取access_token的URL地址
     accessToken: prefix + 'token?grant_type=client_credential'
 }
 
 /**
- * 管理和微信交互的接口，管理票据的更新、存储
- * 构造函数，生成实例，判断票据access_token是否过期，过期则重新写入文件中
+ * 构造函数，生成实例
+ * 判断全局票据access_token是否过期，过期则重新写入 wechat_file.txt 文件中
+ * 管理和微信交互的接口
  */
 function Wechat(opts) {
     var _this = this
@@ -41,15 +44,18 @@ function Wechat(opts) {
             }
         })
         .then(function (data) {
-            console.log(data)
             _this.access_token = data.access_token
             _this.expires_in = data.expires_in
 
+            // 将正确的数据写入文件中
             _this.saveAccessToken(data)
         })
 }
 
-// 检查数据合法性
+/**
+ * 检查数据合法性
+ * 数据存在且未过期，则返回true
+ */
 Wechat.prototype.isValidAccessToken = function (data) {
     if (!data || !data.access_token || !data.expires_in) {
         return false
@@ -66,12 +72,16 @@ Wechat.prototype.isValidAccessToken = function (data) {
     }
 }
 
-// 更新票据access_token
+/**
+ * 更新全局票据access_token
+ * 接口调用说明：
+ * http请求方式: GET
+ * https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET
+ */
 Wechat.prototype.updateAccessToken = function () {
     var appID = this.appID
     var appSecret = this.appSecret
     var url = api.accessToken + '&appid=' + appID + '&secret=' + appSecret
-
 
     return new Promise(function (resolve, reject) {
         // request是一个对http.get/http.post封装后的库

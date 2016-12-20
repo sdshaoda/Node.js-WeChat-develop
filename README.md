@@ -13,6 +13,14 @@ Use Node.js develop WeChat public number
 
 `./natapp.exe`
 
-这是个人正使用的简单的映射工具，小伙伴们也可以自己找一个适合自己的工具
+或者
+
+`npm instsll -g localtunnel`
+
+`lt --port 本地服务的端口`
+
+每次重启本地服务后都要重启localtunnel，并重新配置微信服务器配置。有时不稳定，出错时建议多试几次
+
+安装的依赖
 
 `npm install koa bluebird request raw-body xml2js`

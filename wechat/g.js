@@ -19,11 +19,15 @@ module.exports = function (opts) {
         var nonce = this.query.nonce
         var timestamp = this.query.timestamp
         var echostr = this.query.echostr
+        // 字典排序，拼接成字符串
         var str = [token, timestamp, nonce].sort().join('')
+        // sha1加密
         var sha = sha1(str)
 
         if (this.method === 'GET') {
+            // 验证此信息来源于微信
             if (sha === signature) {
+                // 原样返回echostr内容
                 this.body = echostr + ''
             } else {
                 this.body = 'wrong'
@@ -53,6 +57,7 @@ module.exports = function (opts) {
 
                     _this.status = 200
                     _this.type = 'application/xml'
+                    // 回复文本消息的规定格式，见微信开发者平台(https://mp.weixin.qq.com/wiki)
                     _this.body = `<xml>
                         <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
                         <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
