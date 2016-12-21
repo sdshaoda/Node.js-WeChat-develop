@@ -3,6 +3,7 @@
 var Promise = require('bluebird')
 // 用bluebird对request进行promise化
 var request = Promise.promisify(require('request'))
+var util = require('./util')
 
 // 接口调用前缀
 var prefix = 'https://api.weixin.qq.com/cgi-bin/'
@@ -25,8 +26,8 @@ function Wechat(opts) {
     // 写入票据信息的方法
     this.saveAccessToken = opts.saveAccessToken
 
-    // 注意promise对象需要return
-    return this.getAccessToken()
+    // getAccessToken函数不需要return，被scott老师的评论坑了
+    this.getAccessToken()
         .then(function (data) {
             try {
                 data = JSON.parse(data)
@@ -37,6 +38,7 @@ function Wechat(opts) {
 
             // 即使存在，也要进行合法性检查
             if (_this.isValidAccessToken(data)) {
+                // 注意promise对象需要return
                 return Promise.resolve(data)
             } else {
                 // 过期了，更新
@@ -95,6 +97,17 @@ Wechat.prototype.updateAccessToken = function () {
             resolve(data)
         })
     })
+}
+
+// 消息回复
+Wechat.prototype.reply = function () {
+    var content = this.body
+    var message = this.weixin
+    var xml = util.tpl(content, message)
+
+    this.status = 200
+    this.type = 'application/xml'
+    this.body = xml
 }
 
 module.exports = Wechat

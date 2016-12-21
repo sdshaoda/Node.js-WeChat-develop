@@ -7,7 +7,7 @@ Use Node.js develop WeChat public number
 
 安装依赖
 
-`npm install koa bluebird request raw-body xml2js`
+`npm install`
 
 1. 起一个本地的node服务，注意一下端口号
 

@@ -8,7 +8,7 @@ var Wechat = require('./wechat')
 var util = require('./util')
 
 // 返回一个Generator函数
-module.exports = function (opts) {
+module.exports = function (opts, handler) {
     // 初始化构造函数
     var wechat = new Wechat(opts)
 
@@ -50,37 +50,44 @@ module.exports = function (opts) {
 
             // 格式化
             var message = util.formatMessage(content.xml)
+            console.log(message)
 
-            if (message.MsgType === 'event') {
-                if (message.Event === 'subscribe') {
-                    var now = new Date().getTime()
+            this.weixin = message
 
-                    _this.status = 200
-                    _this.type = 'application/xml'
-                    // 回复文本消息的规定格式，见微信开发者平台(https://mp.weixin.qq.com/wiki)
-                    _this.body = `<xml>
-                        <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
-                        <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
-                        <CreateTime>${now}</CreateTime>
-                        <MsgType><![CDATA[text]]></MsgType>
-                        <Content><![CDATA[嗨，沉醉美少年欢迎你！]]></Content>
-                        <MsgId>1234567890123456</MsgId>
-                        </xml>`
-                }
-            } else if (message.MsgType === 'text') {
-                var now = new Date().getTime()
+            yield handler.call(this, next)
 
-                _this.status = 200
-                _this.type = 'application/xml'
-                _this.body = `<xml>
-                        <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
-                        <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
-                        <CreateTime>${now}</CreateTime>
-                        <MsgType><![CDATA[text]]></MsgType>
-                        <Content><![CDATA[${message.Content}]]></Content>
-                        <MsgId>1234567890123456</MsgId>
-                        </xml>`
-            }
+            wechat.reply.call(this)
+
+            // if (message.MsgType === 'event') {
+            //     if (message.Event === 'subscribe') {
+            //         var now = new Date().getTime()
+
+            //         _this.status = 200
+            //         _this.type = 'application/xml'
+            //         // 回复文本消息的规定格式，见微信开发者平台(https://mp.weixin.qq.com/wiki)
+            //         _this.body = `<xml>
+            //             <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
+            //             <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
+            //             <CreateTime>${now}</CreateTime>
+            //             <MsgType><![CDATA[text]]></MsgType>
+            //             <Content><![CDATA[嗨，沉醉美少年欢迎你！]]></Content>
+            //             <MsgId>1234567890123456</MsgId>
+            //             </xml>`
+            //     }
+            // } else if (message.MsgType === 'text') {
+            //     var now = new Date().getTime()
+
+            //     _this.status = 200
+            //     _this.type = 'application/xml'
+            //     _this.body = `<xml>
+            //             <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
+            //             <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
+            //             <CreateTime>${now}</CreateTime>
+            //             <MsgType><![CDATA[text]]></MsgType>
+            //             <Content><![CDATA[${message.Content}]]></Content>
+            //             <MsgId>1234567890123456</MsgId>
+            //             </xml>`
+            // }
         }
     }
 }
