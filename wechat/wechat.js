@@ -1,5 +1,6 @@
 'use strict'
 
+var fs = require('fs')
 var Promise = require('bluebird')
 // 用bluebird对request进行promise化
 var request = Promise.promisify(require('request'))
@@ -9,7 +10,9 @@ var util = require('./util')
 var prefix = 'https://api.weixin.qq.com/cgi-bin/'
 var api = {
     // 配置获取access_token的URL地址
-    accessToken: prefix + 'token?grant_type=client_credential'
+    accessToken: prefix + 'token?grant_type=client_credential',
+    // 上传临时素材的地址
+    upload: prefix + 'media/upload?'
 }
 
 /**
@@ -26,8 +29,21 @@ function Wechat(opts) {
     // 写入票据信息的方法
     this.saveAccessToken = opts.saveAccessToken
 
-    // getAccessToken函数不需要return，被scott老师的评论坑了
-    this.getAccessToken()
+    this.fetchAccessToken()
+}
+
+Wechat.prototype.fetchAccessToken = function (data) {
+    var _this = this
+
+    // 如果access_token有效
+    if (this.access_token && this.expires_in) {
+        if (this.isValidAccessToken(this)) {
+            return Promise.resolve(this)
+        }
+    }
+
+    // 如果access_token无效
+    return this.getAccessToken()
         .then(function (data) {
             try {
                 data = JSON.parse(data)
@@ -51,6 +67,8 @@ function Wechat(opts) {
 
             // 将正确的数据写入文件中
             _this.saveAccessToken(data)
+
+            return Promise.resolve(data)
         })
 }
 
@@ -96,6 +114,41 @@ Wechat.prototype.updateAccessToken = function () {
             data.expires_in = expires_in
             resolve(data)
         })
+    })
+}
+
+// 上传临时素材
+Wechat.prototype.uploadMaterial = function (type, filepath) {
+    var _this = this
+    var form = {
+        // 创建一个可读的流
+        media: fs.createReadStream(filepath)
+    }
+
+    var appID = this.appID
+    var appSecret = this.appSecret
+
+    return new Promise(function (resolve, reject) {
+        _this
+            .fetchAccessToken()
+            .then(function (data) {
+                var url = api.upload + `access_token=${data.access_token}&type=${type}`
+
+                // request是一个对http.get/http.post封装后的库
+                request({ method: 'POST', url: url, formData: form, json: true }).then(function (response) {
+                    var _data = response.body
+
+                    if (_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error('Upload material fails')
+                    }
+
+                })
+            })
+            .catch(function (err) {
+                reject(err)
+            })
     })
 }
 

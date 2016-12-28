@@ -1,5 +1,11 @@
 'use strict'
 
+
+var config = require('./config')
+var Wechat = require('./wechat/wechat')
+
+var wechatApi = new Wechat(config.wechat)
+
 // 回复消息
 exports.reply = function* (next) {
     var message = this.weixin
@@ -54,6 +60,47 @@ exports.reply = function* (next) {
                 picUrl: 'http://n.sinaimg.cn/eladies/20161206/DYnr-fxyiayt5825332.jpg',
                 url: 'https://github.com/'
             }]
+        } else if (content === '5') {
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '/0.jpg')
+
+            // 由于个人用户无法获得微信认证，无此权限
+            if (data.errcode && data.errcode === 48001) {
+                reply = 'errcode = 48001\n对不起，此微信号尚未获得上传临时素材接口权限'
+            } else {
+                reply = {
+                    type: 'image',
+                    mediaId: data.media_id
+                }
+            }
+        } else if (content === '6') {
+            var data = yield wechatApi.uploadMaterial('video', __dirname + '/1.mp4')
+
+            // 由于个人用户无法获得微信认证，无此权限
+            if (data.errcode && data.errcode === 48001) {
+                reply = 'errcode = 48001\n对不起，此微信号尚未获得上传临时素材接口权限'
+            } else {
+                reply = {
+                    type: 'video',
+                    title: '回复视频',
+                    description: 'description',
+                    mediaId: data.media_id
+                }
+            }
+        } else if (content === '7') {
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '/0.jpg')
+
+            // 由于个人用户无法获得微信认证，无此权限
+            if (data.errcode && data.errcode === 48001) {
+                reply = 'errcode = 48001\n对不起，此微信号尚未获得上传临时素材接口权限'
+            } else {
+                reply = {
+                    type: 'music',
+                    title: '回复音乐',
+                    description: 'description',
+                    musicUrl: 'http://mpge.5nd.com/2015/2015-9-12/66325/1.mp3',
+                    thumbMediaId: data.media_id
+                }
+            }
         }
 
         this.body = reply
