@@ -65,7 +65,7 @@ exports.reply = function* (next) {
 
             // 由于个人用户无法获得微信认证，无此权限
             if (data.errcode && data.errcode === 48001) {
-                reply = 'errcode = 48001\n对不起，此微信号尚未获得上传临时素材接口权限'
+                reply = 'errcode = 48001\n对不起，此处应该上传一张精美的图片。但未获得上传临时素材接口权限'
             } else {
                 reply = {
                     type: 'image',
@@ -77,7 +77,7 @@ exports.reply = function* (next) {
 
             // 由于个人用户无法获得微信认证，无此权限
             if (data.errcode && data.errcode === 48001) {
-                reply = 'errcode = 48001\n对不起，此微信号尚未获得上传临时素材接口权限'
+                reply = 'errcode = 48001\n对不起，此处应该上传一段高清的MP4。但未获得上传临时素材接口权限'
             } else {
                 reply = {
                     type: 'video',
@@ -91,7 +91,7 @@ exports.reply = function* (next) {
 
             // 由于个人用户无法获得微信认证，无此权限
             if (data.errcode && data.errcode === 48001) {
-                reply = 'errcode = 48001\n对不起，此微信号尚未获得上传临时素材接口权限'
+                reply = 'errcode = 48001\n对不起，此处应该上传一首优美的旋律。但未获得上传临时素材接口权限'
             } else {
                 reply = {
                     type: 'music',
@@ -99,6 +99,32 @@ exports.reply = function* (next) {
                     description: 'description',
                     musicUrl: 'http://mpge.5nd.com/2015/2015-9-12/66325/1.mp3',
                     thumbMediaId: data.media_id
+                }
+            }
+        } else if (content === '8') {
+            // 永久素材
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '/0.jpg', { type: 'image' })
+            console.log(data)
+            // 由于个人用户无法获得微信认证，无此权限
+            if (data.errcode && data.errcode === 48001) {
+                reply = 'errcode = 48001\n对不起，无上传永久素材权限'
+            } else {
+                reply = {
+                    type: 'image',
+                    mediaId: data.media_id
+                }
+            }
+        } else if (content === '9') {
+            // 永久素材
+            var data = yield wechatApi.uploadMaterial('video', __dirname + '/1.mp4', { type: 'image', description: '{"title":"Really a nice place", "introduction": "Never think it so easy."}' })
+            console.log(data)
+            // 由于个人用户无法获得微信认证，无此权限
+            if (data.errcode && data.errcode === 48001) {
+                reply = 'errcode = 48001\n对不起，无上传永久素材权限'
+            } else {
+                reply = {
+                    type: 'image',
+                    mediaId: data.media_id
                 }
             }
         }
